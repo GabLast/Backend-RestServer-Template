@@ -6,14 +6,13 @@ const {
     validarJWT,
     esAdminRole,
     tieneRole
+    //esClaveNueva
 } = require('../middlewares');
-
 
 const {
     esRoleValido,
     emailExiste,
-    existeUsuarioPorId,
-    esClaveNueva
+    existeUsuarioPorId
 } = require('../helpers/db-validators');
 
 const {
@@ -32,17 +31,18 @@ router.get('/', usuariosGet);
 router.put('/:id', [
     check('id', 'No es un ID válido').isMongoId(),
     check('id').custom(existeUsuarioPorId),
+    //check(['id','password').custom(esClaveNueva),
+    check('correo').custom(emailExiste),
     check('rol').custom(esRoleValido),
-    esClaveNueva,
     validarCampos
 ], usuariosPut);
 
 router.post('/', [
-    check('nombre', 'El nombre es obligatorio').not().isEmpty(),
+    check('nombre', 'El nombre es obligatorio').not().isEmpty().trim(),
     check('password', 'El password debe de ser más de 6 letras').trim().isLength({ min: 6 }),
     check('correo', 'El correo no es válido').trim().isEmail(),
     check('correo').custom(emailExiste),
-    // check('rol', 'No es un rol válido').isIn(['ADMIN_ROLE','USER_ROLE']),
+    //check('rol', 'No es un rol válido').isIn(['ADMIN_ROLE','USER_ROLE']),
     check('rol').custom(esRoleValido),
     validarCampos
 ], usuariosPost);
@@ -50,15 +50,13 @@ router.post('/', [
 router.delete('/:id', [
     validarJWT,
     // esAdminRole,
-    tieneRole('ADMIN_ROLE', 'VENTAR_ROLE', 'OTRO_ROLE'),
+    tieneRole('ADMIN', 'VENDEDOR', 'USER'),
     check('id', 'No es un ID válido').isMongoId(),
     check('id').custom(existeUsuarioPorId),
     validarCampos
 ], usuariosDelete);
 
 router.patch('/', usuariosPatch);
-
-
 
 
 
